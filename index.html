@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMEI随机生成器（增强版）</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #1a2980, #26d0ce);
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            padding: 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #1a2980;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            color: #26d0ce;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            border-color: #26d0ce;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(38, 208, 206, 0.2);
+        }
+
+        button {
+            background: linear-gradient(90deg, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 1.05rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 5px;
+            box-shadow: 0 4px 15px rgba(26, 41, 128, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(26, 41, 128, 0.3);
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .counter {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .result {
+            background: #f8f9fa;
+            border: 2px dashed #26d0ce;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-top: 15px;
+            position: relative;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #imeiOutput {
+            color: #1a2980;
+            font-weight: bold;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .history-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .history-imei {
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .history-time {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .copy-btn {
+            background: #1a2980;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+        }
+
+        .history-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        /* 复制成功效果 */
+        .copied {
+            background: #2ed573 !important;
+        }
+
+        .copied i:before {
+            content: "\f00c" !important;
+        }
+        
+        .prefix-info {
+            background: #f0f7ff;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #1a2980;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .prefix-info span {
+            font-weight: 600;
+        }
+        
+        .large-count-warning {
+            background-color: #ffecb3;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .large-count-warning i {
+            color: #ff9800;
+            margin-right: 8px;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(90deg, #1a2980, #26d0ce);
+            border-radius: 5px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>IMEI随机生成器（增强版）</h1>
+            <p>支持批量生成和导出功能</p>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-cog"></i> 控制面板</h2>
+            
+            <div class="control-group">
+                <label for="imeiCount">生成数量:</label>
+                <select id="imeiCount">
+                    <option value="1">1个</option>
+                    <option value="5">5个</option>
+                    <option value="10">10个</option>
+                    <option value="50">50个</option>
+                    <option value="100">100个</option>
+                    <option value="500">500个</option>
+                    <option value="1000">1000个</option>
+                </select>
+            </div>
+            
+            <div id="largeCountWarning" class="large-count-warning" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>生成大量IMEI可能需要一些时间，请耐心等待...</span>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+            
+            <div class="prefix-info">
+                <i class="fas fa-database"></i>
+                <span>当前号段数据库包含 <span id="prefixCount">43</span> 个唯一号段</span>
+            </div>
+            
+            <div class="buttons">
+                <button id="generateBtn">
+                    <i class="fas fa-bolt"></i> 生成IMEI
+                </button>
+                <button id="clearHistoryBtn">
+                    <i class="fas fa-trash-alt"></i> 清除记录
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 class="card-title"><i class="fas fa-mobile-alt"></i> 生成的IMEI</h2>
+                <div style="position: relative;">
+                    <span id="counter" class="counter">0</span>
+                </div>
+            </div>
+            
+            <div class="result">
+                <span id="imeiOutput">等待生成...</span>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <button id="copyResultBtn" class="copy-btn">
+                    <i class="fas fa-copy"></i> 复制IMEI
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-check-circle"></i> IMEI验证器</h2>
+            <p style="color: #777; margin-bottom: 15px;">
+                验证或补全14位IMEI，自动计算第15位校验码
+            </p>
+            
+            <div class="control-group">
+                <label>输入IMEI(14位或15位):</label>
+                <div class="input-group">
+                    <input type="text" id="imeiInput" placeholder="输入14位或15位IMEI">
+                    <button id="validateBtn">
+                        <i class="fas fa-calculator"></i> 验证/补全
+                    </button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>完整IMEI(15位):</label>
+                <div class="result">
+                    <span id="validationOutput">验证结果将显示在此</span>
+                </div>
+            </div>
+            
+            <button id="copyValidBtn" class="copy-btn">
+                <i class="fas fa-copy"></i> 复制验证结果
+            </button>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 class="card-title"><i class="fas fa-history"></i> 生成历史记录</h2>
+                <div style="position: relative;">
+                    <span id="historyCounter" class="counter">0</span>
+                </div>
+            </div>
+            
+            <div class="history-container" id="historyContainer">
+                <!-- 历史记录将通过JS动态添加 -->
+            </div>
+            
+            <div class="history-actions">
+                <button id="downloadHistoryBtn" class="download-btn">
+                    <i class="fas fa-download"></i> 下载历史记录
+                </button>
+                <button id="clearHistoryBtn2" class="copy-btn">
+                    <i class="fas fa-trash-alt"></i> 清除历史
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2025 IMEI生成器 | 专业工具 | 增强版
+        </div>
+    </div>
+
+    <script>
+        // 使用您提供的号段列表（已去重）
+        const allPrefixes = [
+        "86600507", "86730606", "86355107", "86032507", "86618307",
+        "86933207", "86075606", "86657606", "86146406", "86278507",
+        "86968607", "86462804", "86469707", "86479707", "86562904",
+        "86238506", "86515206", "86405107"
+        ];
+        
+        // DOM 元素
+        const generateBtn = document.getElementById('generateBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const clearHistoryBtn2 = document.getElementById('clearHistoryBtn2');
+        const copyResultBtn = document.getElementById('copyResultBtn');
+        const validateBtn = document.getElementById('validateBtn');
+        const copyValidBtn = document.getElementById('copyValidBtn');
+        const downloadHistoryBtn = document.getElementById('downloadHistoryBtn');
+        const imeiCount = document.getElementById('imeiCount');
+        const imeiOutput = document.getElementById('imeiOutput');
+        const counter = document.getElementById('counter');
+        const historyCounter = document.getElementById('historyCounter');
+        const imeiInput = document.getElementById('imeiInput');
+        const validationOutput = document.getElementById('validationOutput');
+        const historyContainer = document.getElementById('historyContainer');
+        const largeCountWarning = document.getElementById('largeCountWarning');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+
+        // 历史记录存储
+        let history = JSON.parse(localStorage.getItem('imeiHistory')) || [];
+        let fullHistory = JSON.parse(localStorage.getItem('imeiFullHistory')) || [];
+        
+        // 更新号段计数器
+        document.getElementById('prefixCount').textContent = allPrefixes.length;
+
+        // 初始化
+        updateCounters();
+        renderHistory();
+
+        // 增强随机性：收集熵源
+        let entropy = Date.now();
+        document.addEventListener('mousemove', (e) => {
+            entropy ^= (e.clientX * e.clientY);
+        });
+        document.addEventListener('keydown', () => {
+            entropy ^= (Date.now() % 100000);
+        });
+
+        // 生成IMEI
+        generateBtn.addEventListener('click', generateIMEI);
+        
+        // 复制结果
+        copyResultBtn.addEventListener('click', () => copyText(imeiOutput.innerText, copyResultBtn));
+        copyValidBtn.addEventListener('click', () => copyText(validationOutput.innerText, copyValidBtn));
+        
+        // 清除历史记录
+        clearHistoryBtn.addEventListener('click', clearHistory);
+        clearHistoryBtn2.addEventListener('click', clearHistory);
+        
+        // 验证IMEI
+        validateBtn.addEventListener('click', validateIMEI);
+        
+        // 下载历史记录
+        downloadHistoryBtn.addEventListener('click', downloadHistory);
+
+        function generateIMEI() {
+            const count = parseInt(imeiCount.value);
+            
+            // 显示警告和进度条
+            if (count > 50) {
+                largeCountWarning.style.display = 'flex';
+                progressContainer.style.display = 'block';
+            }
+            
+            // 异步生成以避免界面冻结
+            setTimeout(() => {
+                const imeiList = [];
+                let generatedCount = 0;
+                
+                for (let i = 0; i < count; i++) {
+                    imeiList.push(generateSingleIMEI());
+                    generatedCount++;
+                    
+                    // 更新进度条
+                    if (count > 50) {
+                        const progress = Math.floor((generatedCount / count) * 100);
+                        progressBar.style.width = `${progress}%`;
+                        progressBar.textContent = `${progress}%`;
+                    }
+                }
+                
+                // 显示第一个IMEI
+                imeiOutput.textContent = imeiList[0];
+                
+                // 添加到历史记录
+                imeiList.forEach(imei => {
+                    addToHistory(imei);
+                });
+                
+                // 隐藏警告和进度条
+                largeCountWarning.style.display = 'none';
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+                progressBar.textContent = '0%';
+                
+                updateCounters();
+            }, 50);
+        }
+
+        // 安全随机数生成器
+        function secureRandom(max = 1) {
+            if (window.crypto && window.crypto.getRandomValues) {
+                const array = new Uint32Array(1);
+                window.crypto.getRandomValues(array);
+                return array[0] / (0xFFFFFFFF + 1) * max;
+            } else {
+                return Math.random() * max;
+            }
+        }
+
+        // 增强随机性生成函数
+        function generateRandomDigits(length) {
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                // 使用多种熵源组合
+                const randomFactor = entropy ^ Date.now() ^ performance.now();
+                const rand = (secureRandom() * 1000000 + randomFactor) % 10;
+                result += Math.floor(rand);
+            }
+            return result;
+        }
+
+        function generateSingleIMEI() {
+            // 随机选择前缀
+            const prefixIdx = Math.floor(secureRandom() * allPrefixes.length);
+            const prefix = allPrefixes[prefixIdx];
+            
+            // 生成中间部分（补齐14位）
+            let imeiBase = prefix;
+            const remaining = 14 - prefix.length;
+            if (remaining > 0) {
+                imeiBase += generateRandomDigits(remaining);
+            }
+            
+            // 计算校验位
+            const checksum = calculateChecksum(imeiBase);
+            return imeiBase + checksum;
+        }
+
+        function calculateChecksum(imeiBase) {
+            let sum = 0;
+            for (let i = 0; i < 14; i++) {
+                let digit = parseInt(imeiBase[i]);
+                if (i % 2 === 0) {
+                    sum += digit;
+                } else {
+                    let doubled = digit * 2;
+                    sum += Math.floor(doubled / 10) + (doubled % 10);
+                }
+            }
+            return (10 - (sum % 10)) % 10;
+        }
+
+        function addToHistory(imei) {
+            // 格式化IMEI显示
+            const formattedIMEI = imei.replace(/(.{4})(?=.)/g, '$1 ');
+            
+            const timestamp = new Date().toLocaleString();
+            
+            // 添加到显示历史记录（最多500条）
+            history.unshift({
+                id: Date.now(),
+                imei: formattedIMEI,
+                timestamp: timestamp
+            });
+            
+            // 只保留最近的500条用于显示
+            history = history.slice(0, 500);
+            
+            // 添加到完整历史记录（无限存储）
+            fullHistory.push({
+                id: Date.now(),
+                imei: imei, // 未格式化的原始IMEI
+                timestamp: timestamp
+            });
+            
+            // 保存到本地存储
+            localStorage.setItem('imeiHistory', JSON.stringify(history));
+            localStorage.setItem('imeiFullHistory', JSON.stringify(fullHistory));
+            
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyContainer.innerHTML = '';
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: #777;">没有生成记录</div>';
+                return;
+            }
+            
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div>
+                        <div class="history-imei">${item.imei}</div>
+                        <div class="history-time">${item.timestamp}</div>
+                    </div>
+                    <button class="copy-btn" data-imei="${item.imei.replace(/\s/g, '')}">
+                        <i class="fas fa-copy"></i> 复制
+                    </button>
+                `;
+                historyContainer.appendChild(historyItem);
+                
+                // 添加历史项的复制功能
+                const copyBtn = historyItem.querySelector('.copy-btn');
+                copyBtn.addEventListener('click', function() {
+                    const imei = this.getAttribute('data-imei');
+                    copyText(imei, this);
+                });
+            });
+        }
+
+        function clearHistory() {
+            if (confirm('确定要清除所有历史记录吗？此操作不可恢复。')) {
+                history = [];
+                fullHistory = [];
+                localStorage.setItem('imeiHistory', JSON.stringify(history));
+                localStorage.setItem('imeiFullHistory', JSON.stringify(fullHistory));
+                renderHistory();
+                updateCounters();
+            }
+        }
+
+        function updateCounters() {
+            counter.textContent = history.length;
+            historyCounter.textContent = fullHistory.length;
+        }
+
+        function validateIMEI() {
+            const input = imeiInput.value.replace(/\D/g, '');
+            let result = '', message = '';
+            
+            if (input.length === 14) {
+                const fullIMEI = input + calculateChecksum(input);
+                const formattedIMEI = fullIMEI.replace(/(.{4})(?=.)/g, '$1 ');
+                result = formattedIMEI;
+                message = `补全成功：${formattedIMEI}`;
+            } else if (input.length === 15) {
+                const base = input.substring(0, 14);
+                const checksum = parseInt(input[14]);
+                const calculatedChecksum = calculateChecksum(base);
+                
+                if (checksum === calculatedChecksum) {
+                    const formattedIMEI = input.replace(/(.{4})(?=.)/g, '$1 ');
+                    result = formattedIMEI;
+                    message = `验证成功：有效的IMEI`;
+                } else {
+                    message = '验证失败：无效的IMEI';
+                }
+            } else {
+                message = '输入无效：请输入14或15位数字';
+            }
+            
+            validationOutput.textContent = message;
+            validationOutput.setAttribute('data-full-imei', result.replace(/\s/g, ''));
+            imeiInput.value = '';
+        }
+        
+        function downloadHistory() {
+            if (fullHistory.length === 0) {
+                alert('没有可下载的历史记录');
+                return;
+            }
+            
+            // 创建文本内容 - 每行一个IMEI（未格式化）
+            let content = '';
+            fullHistory.forEach(item => {
+                content += item.imei + '\n';
+            });
+            
+            // 创建Blob对象
+            const blob = new Blob([content], { type: 'text/plain' });
+            
+            // 创建下载链接
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `imei_history_${new Date().toISOString().slice(0, 10)}.txt`;
+            
+            // 触发下载
+            document.body.appendChild(a);
+            a.click();
+            
+            // 清理
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }, 100);
+        }
+
+        function copyText(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHTML = button.innerHTML;
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    button.innerHTML = originalHTML;
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+            });
+        }
+    </script>
+</body>
+</html>
